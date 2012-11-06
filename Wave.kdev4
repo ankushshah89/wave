@@ -1,0 +1,4 @@
+[Project]
+Name=Wave
+Manager=KDevCMakeManager
+VersionControl=kdevgit
