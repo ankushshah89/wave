@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <fstream>
 
 using namespace std;
 
@@ -16,6 +17,8 @@ int incoming_flow(int);
 int outgoing_flow(int);
 void print();
 void start_wave();
+void increase_flow();
+void decrease_flow();
 
 void initialise()
 {
@@ -46,7 +49,7 @@ void print()
 	{
 		for(int j=0;j<no_of_vertices;j++)
 		{	
-			cout<<capacity_matrix[i][j]<<"  ";
+			cout<<flow_matrix[i][j]<<"  ";
 			
 		}
 		cout<<endl;
@@ -56,9 +59,9 @@ void print()
 
 void start_wave()
 {
-	for(int i=0;i<no_of_vertices;i++)
+	for(int j=0;j<no_of_vertices;j++)
 	{
-		flow_matrix[0][i] = capacity_matrix[0][i];
+		flow_matrix[0][j] = capacity_matrix[0][j];
 	}
 }
 
@@ -66,19 +69,26 @@ void increase_flow()
 {
 	bool balanced;
 	int add_flow;
+	int fin,fout;
 	for(int i=1;i<no_of_vertices-1;i++)
 	{
 		balanced = true;
-		if(vertices[i][0] == 1 && incoming_flow(i) != outgoing_flow(i) )
+		fin = incoming_flow(i);
+		fout = outgoing_flow(i);
+		if(vertices[i][0] == 1 && fin  != fout )
 		{
 			balanced =false;
 			//attempt to balance the node
-			for(int j=0;j<no_of_vertices && vertices[j][0] == 1;j++)
+			for(int j=0;j<no_of_vertices;j++)
 			{
-				add_flow = min(capacity_matrix[i][j]-flow_matrix[i][j],incoming_flow(i) - outgoing_flow(i));
-				flow_matrix[i][j] = flow_matrix[i][j] + add_flow;
-				
-				if(incoming_flow(i) != outgoing_flow(i))
+				//if the vertex j is unblocked 
+				if( vertices[j][0] == 1 )
+				{
+					add_flow = min(capacity_matrix[i][j]-flow_matrix[i][j],fin - fout);
+					flow_matrix[i][j] = flow_matrix[i][j] + add_flow;
+					fout = fout + add_flow;
+				}
+				if(fin == fout)
 				{
 					balanced = true;
 					break;
@@ -91,6 +101,13 @@ void increase_flow()
 		{
 			vertices[i][0] = 0;
 		}
+	}
+	
+	//If there is blocked, unbalanced vertex other than s, call decrease flow_matrix
+	for(int i=1;i<no_of_vertices;i++)
+	{
+		if(vertices[i][0] == 0 && incoming_flow(i) != outgoing_flow(i) )
+			decrease_flow();
 	}
 }
 
@@ -118,35 +135,56 @@ int outgoing_flow(int vertex_id)
 void decrease_flow()
 {
 	int subtract_flow;
+	int fin,fout;
 	for(int j=no_of_vertices-2;j>0;j--)
 	{
-		if(vertices[j][0] == 0 && incoming_flow(j) != outgoing_flow(j) )
+		fin = incoming_flow(j);
+		fout = outgoing_flow(j);	
+		if(vertices[j][0] == 0 && fin != fout )
 		{
 			for(int i=0;i<no_of_vertices;i++)
 			{
-				subtract_flow = min(flow_matrix[i][j],incoming_flow(j) - outgoing_flow(j));
+				subtract_flow = min(flow_matrix[i][j],fin - fout);
 				flow_matrix[i][j] = flow_matrix[i][j] - subtract_flow;
+				fin = fin - subtract_flow;
 			}	
 		}
 	}	
+	
+	//if htere an unblocked, unbalanced vertex other than t call increase flow_matrix
+	for(int i=0;i<no_of_vertices-1;i++)
+	{
+		if(vertices[i][0] == 1 && incoming_flow(i) != outgoing_flow(i) )
+			increase_flow();
+	}
 }
 
 
 int main(int argc, char **argv) 
 {
+	int blocking_flow =0;
 	int no_of_lines;
-	cin>>no_of_lines;
-	cin>>no_of_vertices;
+	ifstream fin;
+	fin.open("../tc");
+	fin>>no_of_lines;
+	fin>>no_of_vertices;
 	int v,w,capacity;
 	initialise();
 	for(int i=1;i<no_of_lines;i++)
 	{
-		cin>>v>>w>>capacity;
+		fin>>v>>w>>capacity;
 		capacity_matrix[v][w] = capacity;
 	}
 	
 	start_wave();
 	increase_flow();
-	decrease_flow();
 	print();
+	
+	for(int j=0;j<no_of_vertices;j++)
+	{
+		blocking_flow = blocking_flow + flow_matrix[0][j];
+	}
+	cout<<"\nBlocking Flow is "<<blocking_flow;
+	fin.close();
+	
 }
