@@ -7,7 +7,7 @@ using namespace std;
 #define MAXIMUM_NODES 100
 
 
-int no_of_vertices;
+int no_of_vertices, no_of_edges;
 int capacity_matrix[MAXIMUM_NODES][MAXIMUM_NODES];
 int flow_matrix[MAXIMUM_NODES][MAXIMUM_NODES];
 int vertices[MAXIMUM_NODES][3];
@@ -43,7 +43,7 @@ void initialise()
 	}	
 }
 
-void print()
+void print_adj_matrix()
 {	
 	cout<<"\nFlow matrix is:\n";
 	for(int i=0;i<no_of_vertices;i++)
@@ -57,6 +57,19 @@ void print()
 	}
 }
 
+void print_adj_list()
+{	
+	cout<<"\nFlow diagram is:\n";
+	for(int i=0;i<no_of_vertices;i++)
+	{
+		for(int j=0;j<no_of_vertices;j++)
+		{	
+			if(flow_matrix[i][j]!=0)
+				cout<<i<<" "<<j<<" "<<flow_matrix[i][j]<<endl;
+			
+		}
+	}
+}
 
 void start_wave()
 {
@@ -152,7 +165,7 @@ void decrease_flow()
 		}
 	}	
 	
-	//if htere an unblocked, unbalanced vertex other than t call increase flow_matrix
+	//if there an unblocked, unbalanced vertex other than t call increase flow_matrix
 	for(int i=0;i<no_of_vertices-1;i++)
 	{
 		if(vertices[i][0] == 1 && incoming_flow(i) != outgoing_flow(i) )
@@ -165,27 +178,26 @@ int main(int argc, char **argv)
 {
 	int blocking_flow =0;
 	int no_of_lines;
-	ifstream fin;
-	fin.open("../tc");
-	fin>>no_of_lines;
-	fin>>no_of_vertices;
+	//ifstream fin;
+	//fin.open("../testcases/tc0");
+	cin>>no_of_vertices>>no_of_edges;
 	int v,w,capacity;
 	initialise();
-	for(int i=1;i<no_of_lines;i++)
+	for(int i=0;i<no_of_edges;i++)
 	{
-		fin>>v>>w>>capacity;
+		cin>>v>>w>>capacity;
 		capacity_matrix[v][w] = capacity;
 	}
 	
 	start_wave();
 	increase_flow();
-	print();
+	print_adj_list();
 	
 	for(int j=0;j<no_of_vertices;j++)
 	{
 		blocking_flow = blocking_flow + flow_matrix[0][j];
 	}
-	cout<<"\nBlocking Flow is "<<blocking_flow;
-	fin.close();
+	cout<<"\nBlocking Flow is "<<blocking_flow<<endl;
+	//fin.close();
 	
 }
