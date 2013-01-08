@@ -11,14 +11,17 @@ int no_of_vertices, no_of_edges;
 int capacity_matrix[MAXIMUM_NODES][MAXIMUM_NODES];
 int flow_matrix[MAXIMUM_NODES][MAXIMUM_NODES];
 int vertices[MAXIMUM_NODES][3];
-	
+bool visited_vertices[MAXIMUM_NODES];
+int topoSorted[MAXIMUM_NODES],topoCount = 0;	
 void initialise();
 int incoming_flow(int);
 int outgoing_flow(int);
-void print();
+void print_adj_list();
+void print_adj_matrix();
 void start_wave();
 void increase_flow();
 void decrease_flow();
+void dfs(int );
 
 void initialise()
 {
@@ -34,13 +37,17 @@ void initialise()
 	
 	vertices[0][0] = 0;
 	vertices[0][1] = 0;
-	vertices[0][1] = 0;	
+	vertices[0][2] = 0;	
 	for(int i=1;i<no_of_vertices;i++)
 	{
 		vertices[i][0] = 1;
 		vertices[i][1] = 0;
 		vertices[i][2] = 0;
 	}	
+	
+	for(int i=0;i<no_of_vertices;i++)
+		visited_vertices[i] = false;
+	
 }
 
 void print_adj_matrix()
@@ -51,10 +58,22 @@ void print_adj_matrix()
 		for(int j=0;j<no_of_vertices;j++)
 		{	
 			cout<<flow_matrix[i][j]<<"  ";
-			
 		}
 		cout<<endl;
 	}
+}
+
+void dfs(int u)
+{
+    visited_vertices[u]=true;
+    for(int  i=0;i<no_of_vertices;i++)
+    {
+        if((!visited_vertices[i]) && capacity_matrix[u][i] > 0)
+	{
+            dfs(i);
+	}
+    }
+    topoSorted[topoCount++]=u;
 }
 
 void print_adj_list()
@@ -66,7 +85,6 @@ void print_adj_list()
 		{	
 			if(flow_matrix[i][j]!=0)
 				cout<<i<<" "<<j<<" "<<flow_matrix[i][j]<<endl;
-			
 		}
 	}
 }
@@ -84,8 +102,10 @@ void increase_flow()
 	bool balanced;
 	int add_flow;
 	int fin,fout;
-	for(int i=1;i<no_of_vertices-1;i++)
+	int i;
+	for(int r=1;r<no_of_vertices-1;r++)
 	{
+		i = topoSorted[no_of_vertices-r-1];
 		balanced = true;
 		fin = incoming_flow(i);
 		fout = outgoing_flow(i);
@@ -93,19 +113,23 @@ void increase_flow()
 		{
 			balanced =false;
 			//attempt to balance the node
-			for(int j=0;j<no_of_vertices;j++)
+			for(int j=0;j<no_of_vertices  > 0;j++)
 			{
-				//if the vertex j is unblocked 
-				if( vertices[j][0] == 1 )
+				//check if j is a neighbor
+				if(capacity_matrix[i][j] > 0)
 				{
-					add_flow = min(capacity_matrix[i][j]-flow_matrix[i][j],fin - fout);
-					flow_matrix[i][j] = flow_matrix[i][j] + add_flow;
-					fout = fout + add_flow;
-				}
-				if(fin == fout)
-				{
-					balanced = true;
-					break;
+					//if the vertex j is unblocked 
+					if( vertices[j][0] == 1 )
+					{
+						add_flow = min(capacity_matrix[i][j]-flow_matrix[i][j],fin - fout);
+						flow_matrix[i][j] = flow_matrix[i][j] + add_flow;
+						fout = fout + add_flow;
+					}
+					if(fin == fout)
+					{
+						balanced = true;
+						break;
+					}
 				}
 			}
 		}
@@ -150,17 +174,23 @@ void decrease_flow()
 {
 	int subtract_flow;
 	int fin,fout;
-	for(int j=no_of_vertices-2;j>0;j--)
+	int j;
+	for(int r=no_of_vertices-2;r>0;r--)
 	{
+		j = topoSorted[no_of_vertices - r - 1];
 		fin = incoming_flow(j);
 		fout = outgoing_flow(j);	
 		if(vertices[j][0] == 0 && fin != fout )
 		{
 			for(int i=0;i<no_of_vertices;i++)
 			{
-				subtract_flow = min(flow_matrix[i][j],fin - fout);
-				flow_matrix[i][j] = flow_matrix[i][j] - subtract_flow;
-				fin = fin - subtract_flow;
+				//check if i and j are neighbor
+				if(capacity_matrix[i][j] > 0)
+				{
+					subtract_flow = min(flow_matrix[i][j],fin - fout);
+					flow_matrix[i][j] = flow_matrix[i][j] - subtract_flow;
+					fin = fin - subtract_flow;
+				}
 			}	
 		}
 	}	
@@ -188,6 +218,17 @@ int main(int argc, char **argv)
 		cin>>v>>w>>capacity;
 		capacity_matrix[v][w] = capacity;
 	}
+
+	
+	//do the topological sorting
+	for(int i=0;i<no_of_vertices;i++)
+		if(!visited_vertices[i])
+			dfs(i);
+
+	//print the topo order
+	cout<<"Topolical Order:\n";
+	for(int i=0;i<no_of_vertices;i++)
+		cout<<topoSorted[no_of_vertices -i - 1]<<" ";
 	
 	start_wave();
 	increase_flow();
