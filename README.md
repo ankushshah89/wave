@@ -3,7 +3,7 @@ wave
 
 Wave is an algorithm to find the blocking flow in a network. The complexity of algorithm is O(n^2), which is same as MPM or Karzanov's algorithm. But this, wave algorithm, is very easy to understand and simple to implement. 
 
-More details can be found at http://dl.acm.org/citation.cfm?id=2308840
+More details can be found at http://dl.acm.org/citation.cfm?id=2308840. For quick overview, check the "Presentation.pdf"
 
 Testcases have the following format
 
