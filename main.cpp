@@ -13,6 +13,7 @@ int flow_matrix[MAXIMUM_NODES][MAXIMUM_NODES];
 int vertices[MAXIMUM_NODES][3];
 bool visited_vertices[MAXIMUM_NODES];
 int topoSorted[MAXIMUM_NODES],topoCount = 0;	
+
 void initialise();
 int incoming_flow(int);
 int outgoing_flow(int);
