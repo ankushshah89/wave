@@ -10,6 +10,7 @@ Testcases have the following format
 The first line contain 2 integers n and m. n is the number of vertices and m is the number of edges. This is followed by  m lines, each having three integers u, v, and c. This specify an edge from vertex u to v with a capacity c.
 
 Example:
+
 3 2
 
 0 1 10
