@@ -36,12 +36,12 @@ void initialise()
 		}
 	}
 	
-	vertices[0][0] = 0;
+	vertices[0][0] = 0; //blocked initially
 	vertices[0][1] = 0;
-	vertices[0][2] = 0;	
+	vertices[0][2] = 0; 	
 	for(int i=1;i<no_of_vertices;i++)
 	{
-		vertices[i][0] = 1;
+		vertices[i][0] = 1; //unblocked initially
 		vertices[i][1] = 0;
 		vertices[i][2] = 0;
 	}	
@@ -104,9 +104,13 @@ void increase_flow()
 	int add_flow;
 	int fin,fout;
 	int i;
-	for(int r=1;r<no_of_vertices-1;r++)
+	for(int r=0;r<no_of_vertices;r++)
 	{
 		i = topoSorted[no_of_vertices-r-1];
+		
+		//scan topologically all vertices except s and t.
+		if (i == 0 || i == (no_of_vertices-1))
+			continue;
 		balanced = true;
 		fin = incoming_flow(i);
 		fout = outgoing_flow(i);
@@ -176,9 +180,12 @@ void decrease_flow()
 	int subtract_flow;
 	int fin,fout;
 	int j;
-	for(int r=no_of_vertices-2;r>0;r--)
+	for(int r=no_of_vertices-1;r>=0;r--)
 	{
 		j = topoSorted[no_of_vertices - r - 1];
+		//scan topologically all vertices except s and t.
+		if (j == 0 || j == (no_of_vertices-1))
+			continue;	
 		fin = incoming_flow(j);
 		fout = outgoing_flow(j);	
 		if(vertices[j][0] == 0 && fin != fout )
@@ -227,7 +234,7 @@ int main(int argc, char **argv)
 			dfs(i);
 
 	//print the topo order
-	cout<<"Topolical Order:\n";
+	cout<<"Topoligical Order:\n";
 	for(int i=0;i<no_of_vertices;i++)
 		cout<<topoSorted[no_of_vertices -i - 1]<<" ";
 	
